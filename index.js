@@ -44,6 +44,18 @@ app.post('/', (req, res) => {
 });
 
 // put
+app.put('/:id', (req, res) => {
+    const { id } = req.params;
+    const { nama, nim, kelas } = req.body;
+    pool.query('UPDATE biodata SET nama=$1, nim=$2, kelas=$3 WHERE id=$4', [nama, nim, kelas, id])
+        .then(() => {
+            res.status(200).json({ message: 'Data updated successfully' });
+        })
+        .catch((err) => {
+            console.error('Error executing query', err.stack);
+            res.status(500).json({ error: 'Server Lagi Error nih bray🙏' });
+        });
+});
 
 // delete
 
