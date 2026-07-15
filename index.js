@@ -31,6 +31,17 @@ app.get('/', (req, res) => {
 })
 
 // post
+app.post('/', (req, res) => {
+    const { nama, nim, kelas } = req.body;
+    pool.query('INSERT INTO biodata(nama, nim, kelas) VALUES($1, $2, $3)', [nama, nim, kelas])
+        .then(() => {
+            res.status(201).json({ message: 'Data inserted successfully' });
+        })
+        .catch((err) => {
+            console.error('Error executing query', err.stack);
+            res.status(500).json({ error: 'Server Lagi Error nih bray🙏' });
+        });
+});
 
 // put
 
