@@ -58,6 +58,17 @@ app.put('/:id', (req, res) => {
 });
 
 // delete
+app.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    pool.query('DELETE FROM biodata WHERE id=$1', [id])
+        .then(() => {
+            res.status(200).json({ message: 'Data deleted successfully' });
+        })
+        .catch((err) => {
+            console.error('Error executing query', err.stack);
+            res.status(500).json({ error: 'Server Lagi Error nih bray🙏' });
+        });
+});
 
 app.listen(port, () => {
     console.log(`Server dah jalan disini😎=> http://localhost:${port}`);
