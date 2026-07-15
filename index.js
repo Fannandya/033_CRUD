@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
         })
         .catch((err) => {
             console.error('Error executing query', err.stack);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Server Lagi Error nih bray🙏' });
         });
 })
 
@@ -37,5 +37,5 @@ app.get('/', (req, res) => {
 // delete
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server dah jalan disini😎=> http://localhost:${port}`);
 });
