@@ -1,9 +1,12 @@
 import express from 'express';
 import pg from 'pg';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const port = 3000;
 const { Pool } = pg;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -69,6 +72,8 @@ app.delete('/:id', (req, res) => {
             res.status(500).json({ error: 'Server Lagi Error nih bray🙏' });
         });
 });
+
+app.use(express.static(__dirname));
 
 app.listen(port, () => {
     console.log(`Server dah jalan disini😎=> http://localhost:${port}`);

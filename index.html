@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Mahasiswa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Data Mahasiswa</h1>
+
+        <div id="msg"></div>
+
+        <!-- POST FORM -->
+        <div class="card">
+            <h2>Tambah Mahasiswa</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nama">Nama</label>
+                    <input type="text" id="nama" placeholder="Masukkan nama">
+                </div>
+                <div class="form-group">
+                    <label for="nim">NIM</label>
+                    <input type="text" id="nim" placeholder="Masukkan NIM">
+                </div>
+                <div class="form-group">
+                    <label for="kelas">Kelas</label>
+                    <input type="text" id="kelas" placeholder="Masukkan kelas">
+                </div>
+                <button class="btn btn-add" onclick="addData()">Tambah</button>
+            </div>
+        </div>
+
+        <!-- DATA TABLE -->
+        <div class="card">
+            <h2>Daftar Mahasiswa</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama</th>
+                        <th>NIM</th>
+                        <th>Kelas</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API = '/';
+        const tbody = document.getElementById('tbody');
+        const msg = document.getElementById('msg');
+
+        function showMsg(text, type) {
+            msg.className = 'msg ' + type;
+            msg.textContent = text;
+            setTimeout(() => { msg.className = 'msg'; }, 3000);
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch(API);
+                if (!res.ok) throw new Error('Gagal mengambil data');
+                const data = await res.json();
+                renderTable(data);
+            } catch (err) {
+                showMsg('Error: ' + err.message, 'error');
+            }
+        }
+
+        function renderTable(data) {
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty">Belum ada data</td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.map(row => `
+                <tr>
+                    <td>${row.id}</td>
+                    <td>${row.nama}</td>
+                    <td>${row.nim}</td>
+                    <td>${row.kelas}</td>
+                    <td class="actions">
+                        <button class="btn btn-edit" onclick="editData(${row.id}, '${row.nama}', '${row.nim}', '${row.kelas}')">Edit</button>
+                        <button class="btn btn-delete" onclick="deleteData(${row.id})">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // POST
+        async function addData() {
+            const nama = document.getElementById('nama').value.trim();
+            const nim = document.getElementById('nim').value.trim();
+            const kelas = document.getElementById('kelas').value.trim();
+
+            if (!nama || !nim || !kelas) {
+                showMsg('Semua field harus diisi!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama, nim, kelas })
+                });
+                if (!res.ok) throw new Error('Gagal menambah data');
+                showMsg('Data berhasil ditambahkan', 'success');
+                document.getElementById('nama').value = '';
+                document.getElementById('nim').value = '';
+                document.getElementById('kelas').value = '';
+                fetchData();
+            } catch (err) {
+                showMsg('Error: ' + err.message, 'error');
+            }
+        }
+
+        // PUT
+        function editData(id, nama, nim, kelas) {
+            const row = [...document.querySelectorAll('#tbody tr')].find(tr =>
+                tr.cells[0].textContent == id
+            );
+            if (!row) return;
+
+            row.cells[4].innerHTML = `
+                <div class="edit-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama</label>
+                            <input type="text" id="edit-nama" value="${nama}">
+                        </div>
+                        <div class="form-group">
+                            <label>NIM</label>
+                            <input type="text" id="edit-nim" value="${nim}">
+                        </div>
+                        <div class="form-group">
+                            <label>Kelas</label>
+                            <input type="text" id="edit-kelas" value="${kelas}">
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-save" onclick="saveData(${id})">Simpan</button>
+                        <button class="btn btn-cancel" onclick="fetchData()">Batal</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveData(id) {
+            const nama = document.getElementById('edit-nama').value.trim();
+            const nim = document.getElementById('edit-nim').value.trim();
+            const kelas = document.getElementById('edit-kelas').value.trim();
+
+            if (!nama || !nim || !kelas) {
+                showMsg('Semua field harus diisi!', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(API + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama, nim, kelas })
+                });
+                if (!res.ok) throw new Error('Gagal mengupdate data');
+                showMsg('Data berhasil diupdate', 'success');
+                fetchData();
+            } catch (err) {
+                showMsg('Error: ' + err.message, 'error');
+            }
+        }
+
+        // DELETE
+        async function deleteData(id) {
+            if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+            try {
+                const res = await fetch(API + id, {
+                    method: 'DELETE'
+                });
+                if (!res.ok) throw new Error('Gagal menghapus data');
+                showMsg('Data berhasil dihapus', 'success');
+                fetchData();
+            } catch (err) {
+                showMsg('Error: ' + err.message, 'error');
+            }
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
